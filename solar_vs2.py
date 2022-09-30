@@ -3,7 +3,6 @@ import requests
 import datetime
 
 today = datetime.date.today()
-yesterday = today - datetime.timedelta(days = 1)
 time = datetime.datetime.now()
 current_time = time.strftime("%H:%M:%S")
 ASTRONOMYAPI_ID="9433cef6-d2ff-487c-a6fa-fb2841bd28e1"
@@ -21,9 +20,17 @@ def get_observer_location():
     return latitude, longitude, city, region
 
 
-def get_sun_position(latitude, longitude):
+def get_observer_elevation(latitude, longitude):
+    """Returns the elevation for the location of this machine."""
+    response = requests.get(f'https://api.open-elevation.com/api/v1/lookup?locations={latitude},{longitude}')
+    data = response.json()
+    elevation = data['results'][0]['elevation']
+    return elevation
+
+
+def get_sun_position(latitude, longitude, elevation):
     """Returns the current position of the sun in the sky at the specified location"""
-    params = {"longitude": longitude, "latitude": latitude, "elevation": 274, "from_date": yesterday, 
+    params = {"longitude": longitude, "latitude": latitude, "elevation": elevation, "from_date": today, 
             "to_date": today, "time": current_time
     }
     response = requests.get('https://api.astronomyapi.com/api/v2/bodies/positions/sun/', 
@@ -54,5 +61,6 @@ def print_position(city, region, azimuth, altitude, from_earth, magnitude):
 
 if __name__ == "__main__":
     latitude, longitude, city, region = get_observer_location()
-    azimuth, altitude, from_earth, magnitude = get_sun_position(latitude, longitude)
+    elevation = get_observer_elevation(latitude, longitude)
+    azimuth, altitude, from_earth, magnitude = get_sun_position(latitude, longitude, elevation)
     print_position(city, region, azimuth, altitude, from_earth, magnitude)
