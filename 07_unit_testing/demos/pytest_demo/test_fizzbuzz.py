@@ -1,3 +1,4 @@
+import pytest
 from fizzbuzz import fizzbuzz
 
 
@@ -16,3 +17,11 @@ def test_fizzbuzz_fifteen():
 def test_fizzbuzz_two():
     result = fizzbuzz(2)
     assert result == 2
+
+def test_fizzbuzz_negative():
+    result = fizzbuzz(-1)
+    assert result == -1
+
+def test_fizzbuzz_string():
+    with pytest.raises(TypeError):
+        result = fizzbuzz('abc')
