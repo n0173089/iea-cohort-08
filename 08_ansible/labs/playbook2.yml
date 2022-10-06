@@ -1,0 +1,12 @@
+---
+- hosts: localhost
+  vars:
+    nums:
+      - 3
+      - 4
+      - 18
+      - 30
+  tasks:
+  - debug:
+      msg: 'The lowest number is {{ nums | min }}'
+

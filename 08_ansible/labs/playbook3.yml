@@ -1,0 +1,10 @@
+---
+- hosts: localhost
+  tasks:
+  - copy:
+      content: '# This file has random number {{ 100 | random }}'
+      dest: /tmp/ansible_lab3.txt
+# - file:
+#     path: "/tmp/{{ 100 | random }}"
+#     state: touch
+

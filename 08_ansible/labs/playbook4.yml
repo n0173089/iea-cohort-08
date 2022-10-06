@@ -1,0 +1,30 @@
+---
+- name: James Bond quote
+  hosts: localhost
+  vars:
+    first_name: james
+    last_name: bond
+  tasks:
+  - debug:
+      msg: 'The name is {{ last_name | capitalize }}; {{ first_name | capitalize }} {{ last_name | capitalize }}.'
+
+- name: Find lowest number
+  hosts: localhost
+  vars:
+    nums:
+      - 3
+      - 4
+      - 18
+      - 30
+  tasks:
+  - debug:
+      msg: 'The lowest number is {{ nums | min }} '
+
+- name: Generate random number file
+  hosts: localhost
+  tasks:
+  - copy:
+      content: '# This file has random number {{ 100 | random }}'
+      dest: /tmp/ansible_lab3.txt
+  - debug:
+      msg: 'A random number has been sent to /tmp/ansible_lab3.txt'
