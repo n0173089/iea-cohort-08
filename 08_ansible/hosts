@@ -1,0 +1,13 @@
+[web]
+student16-1 ansible_host=34.69.165.99
+student16-2 ansible_host=34.171.145.117
+
+[db]
+student16-1 ansible_host=34.69.165.99
+
+[all:vars]
+ansible_connection=ssh
+ansible_user=ubuntu
+ansible_ssh_pass="LowePd's"
+ansible_sudo_pass="LowePd's"
+
