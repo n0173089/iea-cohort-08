@@ -1,32 +1,75 @@
 ---
 - name: Setup mysql
   hosts: db
+  become: yes
   tasks:
-    # - name: Install dependencies
-    #   apt:
-    # - name: Allow all hosts to connect
-    #   shell:
-    # - name: Start the mysql
-    #   service:
-    # - name: Create database
-    #   mysql_db:
-    # - name: Create database users
-    #   mysql_user:
+    - name: Install dependencies
+      apt:
+        pkg:
+        - mysql-server
+        - mysql-client
+    - name: Allow all hosts to connect
+      shell:
+        cmd: "sed -i 's/.*bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf"
+    - name: Start the mysql
+      service:
+        name: mysql
+        state: started
+    - name: Create database
+      mysql_db:
+        name: guestbook
+    - name: Create database users
+      mysql_user:
+        name: chris
+        password: Passw0rd
+        priv: '*.*:ALL'
+
 - name: Setup guestbook application
   hosts: web
+  vars:
+    db_user: "chris"
+    db_password: "Passw0rd"
+    db_name: "guestbook"
+    db_host: "34.69.165.99"
+  become: yes
   tasks:
-    # - name: Install dependencies
-    #   apt:
-    # - name: Install flask
-    #   pip:
-    # - name: Download guestbook source code
-    #   git:
+    - name: Install dependencies
+      apt:
+        pkg:
+        - python
+        - python-setuptools
+        - python-dev
+        - build-essential
+        - python-pip
+        - python-mysqldb
+    - name: Install flask
+      pip:
+        name:
+        - configparser
+        - flask
+        - flask-sqlalchemy
+    - name: Download guestbook source code
+      git:
+        repo: https://github.com/ameade/flask-guestbook
+        dest: /opt/flask-guestbook
     - name: Check if application is running
-      shell: "ps -ef |grep -v grep | grep -w flask |awk '{print $2}'"
+      shell: 
+        cmd: "ps -ef |grep -v grep | grep -w flask |awk '{print $2}'"
       register: process_id
       changed_when: process_id.stdout != ""
     - name: Stop the application
-      shell: "kill {{ process_id.stdout }}"
+      shell: 
+        cmd: "kill {{ process_id.stdout }}"
       when: process_id.stdout != ""
-    # - name: Start the application
-    #   shell:
+    - name: Create guestbook config directory
+      file:
+        path: "/opt/guestbook"
+        state: directory
+    - name: Configure application
+      template:
+        src: vars.ini.j2
+        dest: /opt/guestbook/vars.ini
+    - name: Start the application
+      shell: 
+        cmd: "FLASK_APP=/opt/flask-guestbook/app.py nohup flask run -h 0.0.0.0 -p 8080 &"
+
