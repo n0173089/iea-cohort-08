@@ -9,7 +9,7 @@ parser.add_argument('--at', type=datetime.datetime.fromisoformat, default=dateti
 #parser.add_argument('--from', action='store_true', help='You must follow "--from" with a "lat" and "lon" argument')
 #subparsers = parser.add_subparsers(title='subcommands', description='valid subcommands', help='sub-command help')
 parser.add_argument('--lat', type=float, default=0.0, help='enter a latitude')
-parser.add_argument('--lon', type=float, default=0.0, help='enter a longitude')
+parser.add_argument('--long', type=float, default=0.0, help='enter a longitude')
 parser.add_argument('body', default="Sun", nargs='?', help='enter an astronomical body')
 
 args = parser.parse_args()
@@ -18,7 +18,7 @@ date_entered = date.strftime("%Y-%m-%d")
 time = args.at
 time_entered = time.strftime("%H:%M:%S")
 user_lat = args.lat
-user_lon = args.lon
+user_lon = args.long
 astro_body = args.body.capitalize()
 
 ASTRONOMYAPI_ID="9433cef6-d2ff-487c-a6fa-fb2841bd28e1"
