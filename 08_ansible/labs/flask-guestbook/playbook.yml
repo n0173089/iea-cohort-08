@@ -8,21 +8,27 @@
         pkg:
         - mysql-server
         - mysql-client
+        state: present
+
     - name: Allow all hosts to connect
       shell:
         cmd: "sed -i 's/.*bind-address.*/bind-address = 0.0.0.0/' /etc/mysql/mysql.conf.d/mysqld.cnf"
+    
     - name: Start the mysql
       service:
         name: mysql
         state: started
+    
     - name: Create database
       mysql_db:
         name: guestbook
+    
     - name: Create database users
       mysql_user:
         name: chris
+        host: '%'
         password: Passw0rd
-        priv: '*.*:ALL'
+        priv: '*.*:ALL,GRANT'
 
 - name: Setup guestbook application
   hosts: web
@@ -33,6 +39,7 @@
     db_host: "34.69.165.99"
   become: yes
   tasks:
+    
     - name: Install dependencies
       apt:
         pkg:
@@ -42,33 +49,42 @@
         - build-essential
         - python-pip
         - python-mysqldb
+        state: present
+
     - name: Install flask
       pip:
         name:
         - configparser
         - flask
         - flask-sqlalchemy
+        state: present
+
     - name: Download guestbook source code
       git:
         repo: https://github.com/ameade/flask-guestbook
         dest: /opt/flask-guestbook
+    
     - name: Check if application is running
       shell: 
         cmd: "ps -ef |grep -v grep | grep -w flask |awk '{print $2}'"
       register: process_id
       changed_when: process_id.stdout != ""
+    
     - name: Stop the application
       shell: 
         cmd: "kill {{ process_id.stdout }}"
       when: process_id.stdout != ""
+    
     - name: Create guestbook config directory
       file:
         path: "/opt/guestbook"
         state: directory
+    
     - name: Configure application
       template:
         src: vars.ini.j2
         dest: /opt/guestbook/vars.ini
+    
     - name: Start the application
       shell: 
         cmd: "FLASK_APP=/opt/flask-guestbook/app.py nohup flask run -h 0.0.0.0 -p 8080 &"
