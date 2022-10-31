@@ -5,8 +5,8 @@ import datetime
 today = datetime.date.today()
 time = datetime.datetime.now()
 current_time = time.strftime("%H:%M:%S")
-ASTRONOMYAPI_ID="9433cef6-d2ff-487c-a6fa-fb2841bd28e1"
-ASTRONOMYAPI_SECRET="bc1928716fc215ea69c6b62ab2c11b4e95103664a7d7098e220e504def4d9553009107e337dc9c00b3aa70f466db2adba45ab94771452700c8841105bb34ee8b5faf491d5a0d3c02e58a8de48217a72bd4d19dc55af1b80e8b2cad017dc09bd4fb9f415205bf6f7473caa6416cef19fb"
+ASTRONOMYAPI_ID = "9433cef6-d2ff-487c-a6fa-fb2841bd28e1"
+ASTRONOMYAPI_SECRET = "bc1928716fc215ea69c6b62ab2c11b4e95103664a7d7098e220e504def4d9553009107e337dc9c00b3aa70f466db2adba45ab94771452700c8841105bb34ee8b5faf491d5a0d3c02e58a8de48217a72bd4d19dc55af1b80e8b2cad017dc09bd4fb9f415205bf6f7473caa6416cef19fb"
 
 
 def get_observer_location():

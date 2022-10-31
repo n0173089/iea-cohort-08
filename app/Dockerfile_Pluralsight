@@ -1,0 +1,25 @@
+# Instructions in this file are CAPITALIZED.
+# Format is <INSTRUCTION> <value>
+# FROM always first instruction, and its the base image
+FROM Alpine
+
+# Good practice to list maintainer
+LABEL maintainer='christopher.anthony@libertymutual.com'
+
+# Install software
+RUN apk add --update nodejs nodejs-npm
+
+# Copy application files into container, in this case we picked the /src dir
+COPY . /src
+
+# Just indicates directory we're working in
+WORKDIR /src
+
+# Install dependencies
+RUN npm install
+
+# EXPOSE port that app will run on
+EXPOSE 8080
+
+# ENTRYPOINT = default app for image/container
+ENTRYPOINT ["node", "./app.js"]
