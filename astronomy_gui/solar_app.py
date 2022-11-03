@@ -33,13 +33,11 @@ app = Flask(__name__)
 
 # configurations
 font = os.environ.get('DISPLAY_FONT')
-astro_body = "Sun"
-planet_colors = {"Sun": "orange", "Mercury": "maroon", "Venus": "yellow", "Mars": "red", "Jupiter": "brown", "Saturn": "olive", "Uranus": "teal",
-                "Neptune": "navy", "Pluto": "grey"}
-font_color = planet_colors[astro_body]
-current_date = datetime.datetime.now()
-date_entered = current_date.strftime("%Y-%m-%d")
-time_entered = current_date.strftime("%H:%M:%S")
+font_color = ''
+planet_colors = {"Sun": "orange", "Moon": "grey", "Mercury": "maroon", "Venus": "yellow", "Mars": "red", "Jupiter": "brown", "Saturn": "olive", 
+                "Uranus": "teal", "Neptune": "navy", "Pluto": "purple"}
+
+
 
 
 def get_observer_location():
@@ -59,10 +57,10 @@ def get_observer_elevation(latitude, longitude):
     return elevation
 
 
-def get_body_position(latitude, longitude, elevation, astro_body, date_entered, time_entered):
+def get_body_position(latitude, longitude, elevation, astro_body, current_date, current_time):
     """Returns the current position of the body in the sky at the specified location and date/time entered."""
-    params = {"longitude": longitude, "latitude": latitude, "elevation": elevation, "from_date": {date_entered}, 
-            "to_date": {date_entered}, "time": {time_entered}
+    params = {"longitude": longitude, "latitude": latitude, "elevation": elevation, "from_date": {current_date}, 
+            "to_date": {current_date}, "time": {current_time}
     }
     response = requests.get(f'https://api.astronomyapi.com/api/v2/bodies/positions/{astro_body}/', 
                             auth=(ASTRONOMYAPI_ID, ASTRONOMYAPI_SECRET), params=params)
@@ -73,14 +71,16 @@ def get_body_position(latitude, longitude, elevation, astro_body, date_entered, 
     magnitude = data['data']['table']['rows'][0]['cells'][0]['extraInfo']['magnitude']
     return azimuth, altitude, from_earth, magnitude
 
-astro_data = ['']
+astro_data = ['', '', '', '', '', '', '', '', '']
     
 @app.route('/', methods=['GET'])
 def index():
     html = """
+    <body bgcolor="black">
+    <body text="white">
     <form action="/astro_data" method="post">
         Enter an astronomical body: <input type="text" name="astro_body"><br>
-        (Optional) Enter a date in YY-MM-DD format: <input type="text" name="date_entered"><br>
+        (Optional) Enter a date in YYYY-MM-DD format: <input type="text" name="date_entered"><br>
         (Optional) Enter a time in HH:MM:SS format: <input type="text" name="time_entered"><br>
         (Optional) Enter a latitude: <input type="text" name="latitude"><br>
         (Optional) Enter a longitude: <input type="text" name="longitude"><br>
@@ -90,36 +90,73 @@ def index():
     <br />
     Lookup Results: <br />
     <font face="%(font)s" color="%(font_color)s">
-        <p> Astronomical body = %(astro_body)s </p>
-        <p> Azimuth = %(azimuth)s </p>
-        <p> Altitude = %(altitude)s </p>
-        <p> Distance from Earth = %(from_earth)s </p>
-        <p> Magnitude = %(magnitude)s </p>
-        <p> Latitude = %(latitude)s </p>
-        <p> Longitude = %(longitude)s </p>
+        <p> %(astro_body)s </p>
     </font>
-
     <br /> <br />
-    """
-    astro_body = "<br />".join(astro_data)
-    return html % {"font": font, "font_color": font_color, "astro_body": astro_body, "azimuth": azimuth, 
-                "altitude": altitude, "from_earth": '{:,}'.format(round(float(from_earth))), "magnitude": round(float(magnitude), 2), 
-                "latitude": latitude, "longitude": longitude}
+    """   
+    user_data = "<br />".join(astro_data)
+    return html % {"font": font, "font_color": font_color, "astro_body": user_data, "date_entered": user_data, "time_entered": user_data, "azimuth": user_data, 
+                "altitude": user_data, "from_earth": user_data, "magnitude": user_data, 
+                "latitude": user_data, "longitude": user_data}
+
 
 
 @app.route('/astro_data', methods=['POST'])
 def write():
+    current_datetime = datetime.datetime.now()
+    current_date = current_datetime.strftime("%Y-%m-%d")
+    current_time = current_datetime.strftime("%H:%M:%S")
     astro_body = request.form.get('astro_body')
     date_entered = request.form.get('date_entered')
     time_entered = request.form.get('time_entered')
-    latitude = request.form.get('latitude')
-    longitude = request.form.get('longitude')
-    astro_data[0] = astro_body
+    latitude_entered = request.form.get('latitude')
+    longitude_entered = request.form.get('longitude')
+    if astro_body == '':
+        astro_data[0] = 'You must enter an astronomical body!'
+        astro_data[1] = ''
+        astro_data[2] = ''
+        astro_data[3] = ''
+        astro_data[4] = ''
+        astro_data[5] = ''
+        astro_data[6] = ''
+        astro_data[7] = ''
+        astro_data[8] = ''
+    else:
+        astro_body = astro_body.capitalize()
+        global font_color
+        font_color = planet_colors[astro_body]
+        astro_data[0] = f'Astronomical body = {astro_body}'
+        if date_entered == '':
+            astro_data[1] = f'Date entered = {current_date}'
+        else:
+            astro_data[1] = f'Date entered = {date_entered}'
+            current_date = date_entered
+        if time_entered == '':
+            astro_data[2] = f'Time entered = {current_time}'
+        else:
+            astro_data[2] = f'Time entered = {time_entered}'
+            current_time = time_entered
+        if latitude_entered == '':
+            latitude, longitude = get_observer_location()
+            astro_data[3] = f'Latitude = {latitude}'
+        else:
+            astro_data[3] = f'Latitude = {latitude_entered}'
+            latitude = latitude_entered
+        if longitude_entered == '':
+            latitude, longitude = get_observer_location()
+            astro_data[4] = f'Longitude = {longitude}'
+        else:
+            astro_data[4] = f'Longitude = {longitude_entered}'
+            longitude = longitude_entered
+        elevation = get_observer_elevation(latitude, longitude)
+        azimuth, altitude, from_earth, magnitude = get_body_position(latitude, longitude, elevation, astro_body, current_date, current_time)
+        magnitude = round(float(magnitude), 2)
+        from_earth = '{:,}'.format(round(float(from_earth)))
+        astro_data[5] = f'Azimuth = {azimuth}'
+        astro_data[6] = f'Altitude = {altitude}'
+        astro_data[7] = f'Distance from Earth = {from_earth}'
+        astro_data[8] = f'Magnitude = {magnitude}'
     return redirect(url_for('index'))
 
-
 if __name__ == "__main__": 
-    latitude, longitude = get_observer_location()
-    elevation = get_observer_elevation(latitude, longitude)
-    azimuth, altitude, from_earth, magnitude = get_body_position(latitude, longitude, elevation, astro_body, date_entered, time_entered)
     app.run(host='0.0.0.0', port=8080)
