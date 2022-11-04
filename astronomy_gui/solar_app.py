@@ -21,7 +21,6 @@ import datetime
 # time_entered = time.strftime("%H:%M:%S")
 # user_lat = args.lat
 # user_lon = args.long
-# astro_body = args.body.capitalize()
 
 ASTRONOMYAPI_ID="9433cef6-d2ff-487c-a6fa-fb2841bd28e1"
 ASTRONOMYAPI_SECRET="bc1928716fc215ea69c6b62ab2c11b4e95103664a7d7098e220e504def4d9553009107e337dc9c00b3aa70f466db2adba45ab94771452700c8841105bb34ee8b5faf491d5a0d3c02e58a8de48217a72bd4d19dc55af1b80e8b2cad017dc09bd4fb9f415205bf6f7473caa6416cef19fb"
@@ -30,14 +29,6 @@ ASTRONOMYAPI_SECRET="bc1928716fc215ea69c6b62ab2c11b4e95103664a7d7098e220e504def4
 
 
 app = Flask(__name__)
-
-# configurations
-font = os.environ.get('DISPLAY_FONT')
-font_color = ''
-planet_colors = {"Sun": "orange", "Moon": "grey", "Mercury": "maroon", "Venus": "yellow", "Mars": "red", "Jupiter": "brown", "Saturn": "olive", 
-                "Uranus": "teal", "Neptune": "navy", "Pluto": "purple"}
-
-
 
 
 def get_observer_location():
@@ -72,12 +63,39 @@ def get_body_position(latitude, longitude, elevation, astro_body, current_date, 
     return azimuth, altitude, from_earth, magnitude
 
 astro_data = ['', '', '', '', '', '', '', '', '']
+body_color = ''
+body_colors = {"Sun": "orange", 
+                "Moon": "grey", 
+                "Mercury": "maroon", 
+                "Venus": "yellow", 
+                "Mars": "red", 
+                "Jupiter": "brown", 
+                "Saturn": "olive", 
+                "Uranus": "teal", 
+                "Neptune": "navy", 
+                "Pluto": "purple"
+                }
+body_image = ''
+body_images = {"Sun": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~orig.jpg", 
+                "Moon": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001861/GSFC_20171208_Archive_e001861~thumb.jpg", 
+                "Mercury": "https://images-assets.nasa.gov/image/PIA11245/PIA11245~thumb.jpg", 
+                "Venus": "https://images-assets.nasa.gov/image/PIA00271/PIA00271~thumb.jpg", 
+                "Mars": "https://images-assets.nasa.gov/image/PIA00407/PIA00407~thumb.jpg", 
+                "Jupiter": "https://images-assets.nasa.gov/image/PIA00343/PIA00343~thumb.jpg", 
+                "Saturn": "https://images-assets.nasa.gov/image/PIA00400/PIA00400~thumb.jpg", 
+                "Uranus": "https://images-assets.nasa.gov/image/PIA18182/PIA18182~thumb.jpg", 
+                "Neptune": "https://images-assets.nasa.gov/image/PIA00046/PIA00046~thumb.jpg", 
+                "Pluto": "https://images-assets.nasa.gov/image/PIA19952/PIA19952~thumb.jpg",
+                "System": "https://images-assets.nasa.gov/image/PIA03153/PIA03153~thumb.jpg"
+                }
+astro_bodies = ("Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
     
 @app.route('/', methods=['GET'])
 def index():
     html = """
     <body bgcolor="black">
     <body text="white">
+    <font face="verdana, sans-serif">
     <form action="/astro_data" method="post">
         Enter an astronomical body: <input type="text" name="astro_body"><br>
         (Optional) Enter a date in YYYY-MM-DD format: <input type="text" name="date_entered"><br>
@@ -88,17 +106,22 @@ def index():
     </form>
     <br />
     <br />
+    <img src="%(body_image)s" alt="All images courtesy of images.nasa.gov" width="400" height="400", style="float:right"> 
     Lookup Results: <br />
-    <font face="%(font)s" color="%(font_color)s">
-        <p> %(astro_body)s </p>
+    
     </font>
+    <p> 
+    <font face="verdana, sans-serif" color="%(body_color)s">
+    
+    %(astro_body)s
+    </font>
+    </p>
     <br /> <br />
     """   
     user_data = "<br />".join(astro_data)
-    return html % {"font": font, "font_color": font_color, "astro_body": user_data, "date_entered": user_data, "time_entered": user_data, "azimuth": user_data, 
+    return html % {"body_color": body_color, "astro_body": user_data, "date_entered": user_data, "time_entered": user_data, "azimuth": user_data, 
                 "altitude": user_data, "from_earth": user_data, "magnitude": user_data, 
-                "latitude": user_data, "longitude": user_data}
-
+                "latitude": user_data, "longitude": user_data, "body_image": body_image}
 
 
 @app.route('/astro_data', methods=['POST'])
@@ -111,20 +134,18 @@ def write():
     time_entered = request.form.get('time_entered')
     latitude_entered = request.form.get('latitude')
     longitude_entered = request.form.get('longitude')
-    if astro_body == '':
-        astro_data[0] = 'You must enter an astronomical body!'
-        astro_data[1] = ''
-        astro_data[2] = ''
-        astro_data[3] = ''
-        astro_data[4] = ''
-        astro_data[5] = ''
-        astro_data[6] = ''
-        astro_data[7] = ''
-        astro_data[8] = ''
+    global body_image
+    global body_color
+    if astro_body.capitalize() not in astro_bodies:
+        body_image = body_images['System']
+        body_color = ''
+        astro_data[0] = 'You must enter an astronomical body within our solar system!'
+        for i in range(1, len(astro_data)):
+            astro_data[i] = ''
     else:
         astro_body = astro_body.capitalize()
-        global font_color
-        font_color = planet_colors[astro_body]
+        body_color = body_colors[astro_body]
+        body_image = body_images[astro_body]
         astro_data[0] = f'Astronomical body = {astro_body}'
         if date_entered == '':
             astro_data[1] = f'Date entered = {current_date}'
