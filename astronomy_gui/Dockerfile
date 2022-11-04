@@ -9,9 +9,6 @@ RUN pip3 install Flask
 
 # Install curl
 RUN apk add curl
-
-# Set default environment variables
-ENV DISPLAY_FONT="arial"
  
 # Have the container expose port 8080
 EXPOSE 8080
