@@ -65,6 +65,7 @@ def print_position(astro_body, azimuth, altitude, from_earth, magnitude, latitud
     {astro_body}:
         Distance from Earth: {from_earth} km
         Magnitude: {magnitude}
+        Elevation: {elevation} m
         Position:
             Azimuth: {azimuth}
             Altitude: {altitude}''')
