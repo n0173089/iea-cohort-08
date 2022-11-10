@@ -4,9 +4,9 @@ LABEL maintainer='christopher.anthony@libertymutual.com'
 # Copy application files into container
 COPY * /app/
 
-# Install Flask
+# Install Flask and requests
 RUN pip3 install Flask
-
+RUN pip3 install requests
 # Install curl
 RUN apk add curl
  
