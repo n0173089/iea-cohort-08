@@ -20,14 +20,12 @@ def get_observer_location():
     longitude = data['lon']
     return latitude, longitude
 
-
 def get_observer_elevation(latitude, longitude):
     """Returns the elevation for the latitude and longitude previously entered."""
     response = requests.get(f'https://api.open-elevation.com/api/v1/lookup?locations={latitude},{longitude}')
     data = response.json()
     elevation = data['results'][0]['elevation']
     return elevation
-
 
 def get_body_position(latitude, longitude, elevation, astro_body, current_date, current_time):
     """Returns the current position of the body in the sky at the specified location and date/time entered."""
@@ -44,52 +42,78 @@ def get_body_position(latitude, longitude, elevation, astro_body, current_date, 
     return azimuth, altitude, from_earth, magnitude
 
 astro_data = ['', '', '', '', '', '', '', '', '', '']
-body_color = 'white'
-body_colors = {"Sun": "orange", 
-                "Moon": "grey", 
-                "Mercury": "maroon", 
-                "Venus": "yellow", 
-                "Mars": "red", 
-                "Jupiter": "brown", 
-                "Saturn": "olive", 
-                "Uranus": "teal", 
-                "Neptune": "navy", 
-                "Pluto": "purple"
-                }
-body_image = 'https://images-assets.nasa.gov/image/PIA03153/PIA03153~thumb.jpg'
-body_images = {"Sun": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~orig.jpg", 
-                "Moon": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001861/GSFC_20171208_Archive_e001861~thumb.jpg", 
-                "Mercury": "https://images-assets.nasa.gov/image/PIA11245/PIA11245~thumb.jpg", 
-                "Venus": "https://images-assets.nasa.gov/image/PIA00271/PIA00271~thumb.jpg", 
-                "Mars": "https://images-assets.nasa.gov/image/PIA00407/PIA00407~thumb.jpg", 
-                "Jupiter": "https://images-assets.nasa.gov/image/PIA00343/PIA00343~thumb.jpg", 
-                "Saturn": "https://images-assets.nasa.gov/image/PIA00400/PIA00400~thumb.jpg", 
-                "Uranus": "https://images-assets.nasa.gov/image/PIA18182/PIA18182~thumb.jpg", 
-                "Neptune": "https://images-assets.nasa.gov/image/PIA00046/PIA00046~thumb.jpg", 
-                "Pluto": "https://images-assets.nasa.gov/image/PIA19952/PIA19952~thumb.jpg",
-                "System": "https://images-assets.nasa.gov/image/PIA03153/PIA03153~thumb.jpg"
-                }
-body_video = 'https://www.youtube.com/embed/libKVRa01L8'
-body_videos = {"Sun": "https://www.youtube.com/embed/2HoTK_Gqi2Q", 
-                "Moon": "https://www.youtube.com/embed/6AviDjR9mmo", 
-                "Mercury": "https://www.youtube.com/embed/0KBjnNuhRHs", 
-                "Venus": "https://www.youtube.com/embed/BvXa1n9fjow", 
-                "Mars": "https://www.youtube.com/embed/D8pnmwOXhoY", 
-                "Jupiter": "https://www.youtube.com/embed/PtkqwslbLY8", 
-                "Saturn": "https://www.youtube.com/embed/epZdZaEQhS0", 
-                "Uranus": "https://www.youtube.com/embed/m4NXbFOiOGk", 
-                "Neptune": "https://www.youtube.com/embed/NStn7zZKXfE", 
-                "Pluto": "https://www.youtube.com/embed/-iZio70bd-M",
-                "System": "https://www.youtube.com/embed/libKVRa01L8",
-                "Fail": "https://www.youtube.com/embed/kdOPBP9vuZA"
-                }
-astro_bodies = ("Sun", "Moon", "Mercury", "Venus", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune", "Pluto")
 
+body_format = {
+    "System": {
+            "body_color": "white",
+            "body_image": "https://images-assets.nasa.gov/image/PIA03153/PIA03153~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/libKVRa01L8"
+        },
+    "Sun": {
+            "body_color": "orange",
+            "body_image": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001435/GSFC_20171208_Archive_e001435~orig.jpg",
+            "body_video": "https://www.youtube.com/embed/2HoTK_Gqi2Q"
+        },
+    "Moon": {
+            "body color": "grey",
+            "body_image": "https://images-assets.nasa.gov/image/GSFC_20171208_Archive_e001861/GSFC_20171208_Archive_e001861~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/6AviDjR9mmo"
+        },
+    "Mercury": {
+            "body_color": "maroon",
+            "body_image": "https://images-assets.nasa.gov/image/PIA11245/PIA11245~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/0KBjnNuhRHs"
+        },
+    "Venus": {
+            "body_color": "yellow",
+            "body_image": "https://images-assets.nasa.gov/image/PIA00271/PIA00271~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/BvXa1n9fjow"
+        },
+    "Mars": {
+            "body_color": "red",
+            "body_image": "https://images-assets.nasa.gov/image/PIA00407/PIA00407~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/D8pnmwOXhoY"
+        },
+    "Jupiter": {
+            "body_color": "brown",
+            "body_image": "https://images-assets.nasa.gov/image/PIA00343/PIA00343~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/PtkqwslbLY8"
+        },
+    "Saturn": {
+            "body_color": "olive",
+            "body_image": "https://images-assets.nasa.gov/image/PIA00400/PIA00400~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/epZdZaEQhS0"
+        },
+    "Uranus": {
+            "body_color": "teal",
+            "body_image": "https://images-assets.nasa.gov/image/PIA18182/PIA18182~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/m4NXbFOiOGk"
+        },
+    "Neptune": {
+            "body_color": "navy",
+            "body_image": "https://images-assets.nasa.gov/image/PIA00046/PIA00046~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/NStn7zZKXfE"
+        },
+    "Pluto": {
+            "body_color": "purple",
+            "body_image": "https://images-assets.nasa.gov/image/PIA19952/PIA19952~thumb.jpg",
+            "body_video": "https://www.youtube.com/embed/-iZio70bd-M"
+        },
+    "Fail": {
+            "body_color": "white",
+            "body_image": "",
+            "body_video": "https://www.youtube.com/embed/kdOPBP9vuZA"
+        }
+    }
+
+body_color = body_format["System"]["body_color"]
+body_image = body_format["System"]["body_image"]
+body_video = body_format["System"]["body_video"]
 
 @app.route('/', methods=['GET'])
 def index():
     html = """
-    <h1>Astrometrics Database</h1>
+    <h1>Astrometric Awesomeness!</h1>
     <body bgcolor="black">
     <body text="white">
     <font face="verdana, sans-serif">
@@ -103,38 +127,25 @@ def index():
     </form>
     Lookup Results: <br />
     <br />
-    <p><img src="%(body_image)s" alt="This is where an image would display if you had followed the directions!" width="300" height="300", style="float:right"> 
-    <iframe width="300" height="300" src="%(body_video)s" title="YouTube video player" frameborder="0" allow="accelerometer; 
-    autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen style="float:right">
+    <p><img src="%(body_image)s" alt="Ha Ha!" width="400" height="400", style="float:right"> 
+    <iframe width="400" height="400" src="%(body_video)s" title="YouTube video player" frameborder="0" allow="accelerometer; 
+    autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen>
     </iframe></p>
-    <br />
     </font>
     <p> 
     <font face="verdana, sans-serif" color="%(body_color)s">
     %(astro_body)s
     </p>
     </font>
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
-    <br />
     <div align="right" >
     *All images courtesy of images.nasa.gov
     </div>
-
     <br /> <br />
     """   
     user_data = "<br />".join(astro_data)
     return html % {"body_color": body_color, "body_image": body_image, "body_video": body_video, "astro_body": user_data, "date_entered": user_data, 
                 "time_entered": user_data, "azimuth": user_data, "altitude": user_data, "from_earth": user_data, "magnitude": user_data, 
                 "latitude": user_data, "longitude": user_data}
-
 
 @app.route('/astro_data', methods=['POST'])
 def write():
@@ -149,19 +160,19 @@ def write():
     global body_image
     global body_color
     global body_video
-    if astro_body.capitalize() not in astro_bodies:
-        body_image = body_images['System']
-        body_color = 'white'
-        body_video = body_videos['System']
+    if astro_body.capitalize() not in body_format:
+        body_color = body_format["System"]["body_color"]
+        body_image = body_format["System"]["body_image"]
+        body_video = body_format["System"]["body_video"]
         astro_data[0] = 'You must enter "Sun", "Moon", or a planet within our solar system!'
         for i in range(1, len(astro_data)):
             astro_data[i] = ''
     else:
         try:
             astro_body = astro_body.capitalize()
-            body_color = body_colors[astro_body]
-            body_image = body_images[astro_body]
-            body_video = body_videos[astro_body]
+            body_color = body_format[astro_body]["body_color"]
+            body_image = body_format[astro_body]["body_image"]
+            body_video = body_format[astro_body]["body_video"]
             astro_data[0] = f'Solar system body = {astro_body}'
             if date_entered == '' and time_entered == '':
                 astro_data[1] = f'Current Local Date = {current_date}'
@@ -176,8 +187,8 @@ def write():
                 astro_data[3] = f'Your Latitude = {latitude}'
                 astro_data[4] = f'Your Longitude = {longitude}'
             else:
-                astro_data[3] = f'Latitude Entered = {float(latitude_entered)}'
-                astro_data[4] = f'Longitude Entered = {float(longitude_entered)}'
+                astro_data[3] = f'Latitude Entered = {"{0:.4f}".format(float(latitude_entered))}'
+                astro_data[4] = f'Longitude Entered = {"{0:.4f}".format(float(longitude_entered))}'
                 latitude = latitude_entered
                 longitude = longitude_entered
             elevation = get_observer_elevation(latitude, longitude)
@@ -190,9 +201,9 @@ def write():
             astro_data[8] = f'Distance from Earth = {from_earth} km'
             astro_data[9] = f'Magnitude = {magnitude}'
         except:
-            body_image = ''
-            body_color = 'white'
-            body_video = body_videos['Fail']
+            body_color = body_format["Fail"]["body_color"]
+            body_image = body_format["Fail"]["body_image"]
+            body_video = body_format["Fail"]["body_video"]
             astro_data[0] = 'You entered invalid data in one or more of the optional fields. Please try again!'
             for i in range(1, len(astro_data)):
                 astro_data[i] = ''
